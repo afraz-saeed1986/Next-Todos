@@ -9,7 +9,7 @@ function Index() {
   useEffect(() => {
     fetch("/api/auth/me").then((res) => {
       if (res.status === 200) {
-        router.replace("/dashboard");
+        router.replace("/todos");
       }
     });
   }, []);
@@ -31,7 +31,7 @@ function Index() {
       setIdentifier("");
       setPassword("");
       alert("Logged In Successfully :))");
-      router.replace("/dashboard");
+      router.replace("/todos");
     } else if (res.status === 404) {
       alert("User Not Found :))");
     } else if (res.status === 422) {

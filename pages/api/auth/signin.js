@@ -42,11 +42,12 @@ const handler = async (req, res) => {
           httpOnly: true,
           path: "/",
           maxAge: 60 * 60 * 24,
-        })
+        }),
       )
       .status(200)
       .json({ message: "User Logged In Successfully :))" });
   } catch (err) {
+    console.log(err);
     return res
       .status(500)
       .json({ message: "UnKnown Internal Server Erorr !!" });
