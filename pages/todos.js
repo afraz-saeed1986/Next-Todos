@@ -5,10 +5,22 @@ import { config } from "@fortawesome/fontawesome-svg-core";
 config.autoAddCss = false;
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import connectToDB from "@/configs/db";
+import { verifyToken } from "@/utils/auth";
+import todoModel from "@/models/Todo";
+import userModel from "@/models/User";
 
-function Todolist() {
+function Todolist({ user, todos }) {
   const [isShowInput, setIsShowInput] = useState(false);
   const [title, setTitle] = useState("");
+  const [allTodos, setAllTodos] = useState([...todos]);
+
+  const getTodos = async () => {
+    const res = await fetch("/api/todos");
+    const data = await res.json();
+
+    setAllTodos(data);
+  };
 
   const addTodo = async () => {
     const res = await fetch("/api/todos", {
@@ -22,7 +34,8 @@ function Todolist() {
     if (res.status === 201) {
       setTitle("");
       alert("Todo Added Successfully :))");
-      // Codes
+
+      getTodos();
     }
   };
   return (
@@ -53,7 +66,9 @@ function Todolist() {
         </div>
         <div className="head">
           <div className="date">
-            <p>{`user.name`}</p>
+            <p>
+              {user.firstname} {user.lastname}
+            </p>
           </div>
           <div className="add" onClick={(event) => setIsShowInput(true)}>
             <svg
@@ -79,17 +94,19 @@ function Todolist() {
         <div className="pad">
           <div id="todo">
             <ul id="tasksContainer">
-              <li>
-                <span className="mark">
-                  <input type="checkbox" className="checkbox" />
-                </span>
-                <div className="list">
-                  <p>{`Todo.title`}</p>
-                </div>
-                <span className="delete">
-                  <FontAwesomeIcon icon={faTrash} />
-                </span>
-              </li>
+              {allTodos.map((todo) => (
+                <li key={todo._id}>
+                  <span className="mark">
+                    <input type="checkbox" className="checkbox" />
+                  </span>
+                  <div className="list">
+                    <p>{todo.title}</p>
+                  </div>
+                  <span className="delete">
+                    <FontAwesomeIcon icon={faTrash} />
+                  </span>
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -98,4 +115,45 @@ function Todolist() {
   );
 }
 
+export async function getServerSideProps(context) {
+  connectToDB();
+
+  const { token } = context.req.cookies;
+
+  if (!token) {
+    return {
+      redirect: {
+        destination: "/signin",
+      },
+    };
+  }
+
+  const tokenPayload = verifyToken(token);
+
+  if (!tokenPayload) {
+    return {
+      redirect: {
+        destination: "/signin",
+      },
+    };
+  }
+
+  const user = await userModel.findOne(
+    {
+      email: tokenPayload.email,
+    },
+    "firstname lastname",
+  );
+
+  const todos = await todoModel.find({
+    user: user._id,
+  });
+
+  return {
+    props: {
+      user: JSON.parse(JSON.stringify(user)),
+      todos: JSON.parse(JSON.stringify(todos)),
+    },
+  };
+}
 export default Todolist;
