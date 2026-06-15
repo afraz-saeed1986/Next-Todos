@@ -7,6 +7,24 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 
 function Todolist() {
+  const [isShowInput, setIsShowInput] = useState(false);
+  const [title, setTitle] = useState("");
+
+  const addTodo = async () => {
+    const res = await fetch("/api/todos", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ title, isCompleted: false }),
+    });
+
+    if (res.status === 201) {
+      setTitle("");
+      alert("Todo Added Successfully :))");
+      // Codes
+    }
+  };
   return (
     <>
       <h1>Next-Todos</h1>
@@ -16,14 +34,19 @@ function Todolist() {
       </div>
 
       <div className="container">
-        <div className="form-container">
+        <div
+          className="form-container"
+          style={{ display: `${isShowInput ? "block" : "none"}` }}
+        >
           <div className="add-form">
             <input
               id="input"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               type="text"
               placeholder="Type your To-Do works..."
             />
-            <button type="submit" id="submit">
+            <button type="submit" id="submit" onClick={addTodo}>
               ADD
             </button>
           </div>
@@ -32,7 +55,7 @@ function Todolist() {
           <div className="date">
             <p>{`user.name`}</p>
           </div>
-          <div className="add">
+          <div className="add" onClick={(event) => setIsShowInput(true)}>
             <svg
               width="2rem"
               height="2rem"
