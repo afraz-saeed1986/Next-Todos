@@ -9,8 +9,10 @@ import connectToDB from "@/configs/db";
 import { verifyToken } from "@/utils/auth";
 import todoModel from "@/models/Todo";
 import userModel from "@/models/User";
+import { useRouter } from "next/router";
 
 function Todolist({ user, todos }) {
+  const router = useRouter();
   const [isShowInput, setIsShowInput] = useState(false);
   const [title, setTitle] = useState("");
   const [allTodos, setAllTodos] = useState([...todos]);
@@ -46,6 +48,16 @@ function Todolist({ user, todos }) {
       alert("Todo Added Successfully :))");
 
       getTodos();
+    }
+  };
+
+  const signOut = async () => {
+    const res = await fetch("/api/auth/signout");
+    console.log("Res =>", res);
+
+    if (res.status === 200) {
+      alert("Logout successfully :))");
+      router.replace("/signin");
     }
   };
   return (
@@ -97,7 +109,7 @@ function Todolist({ user, todos }) {
               />
             </svg>
           </div>
-          <div className="time">
+          <div className="time" onClick={signOut}>
             <a href="#">Logout</a>
           </div>
         </div>
