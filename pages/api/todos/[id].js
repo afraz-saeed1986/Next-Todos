@@ -18,6 +18,12 @@ const handler = async (req, res) => {
     return res.status(401).json({ message: "You are not login !!" });
   }
 
+  const user = await userModel.findOne({ email: tokenPayload.email });
+
+  if (!user) {
+    return res.status(404).json({ message: "User not found !!" });
+  }
+
   if (req.method === "DELETE") {
     try {
       const { id } = req.query;
